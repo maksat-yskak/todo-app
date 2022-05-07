@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/lib/pq"
 	"github.com/maksat-yskak/todo-app"
 	"github.com/maksat-yskak/todo-app/pkg/handler"
 	"github.com/maksat-yskak/todo-app/pkg/repository"
@@ -14,7 +15,19 @@ func main() {
 		log.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	repos := repository.NewRepository()
+	db, err := repository.NewPostgresDB(repository.Config{
+		Host:     "localhost",
+		Port:     "5432",
+		Username: "postgres",
+		DBName:   "postgres",
+		SSLMode:  "disable",
+		Password: "qwerty",
+	})
+	if err != nil {
+		log.Fatalf("failed to initialize db: %s", err.Error())
+	}
+
+	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
